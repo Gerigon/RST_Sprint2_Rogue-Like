@@ -1,26 +1,32 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class StartMenu : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () 
-	{
-		
-	}
-	
-	public void StartRogueLike()
-	{
-		Application.LoadLevel (1);
-	}
+namespace Completed
+{
+    public class StartMenu : MonoBehaviour
+    {
 
-	public void Settings()
-	{
-		Debug.Log ("settings");
-	}
+        // Use this for initialization
+        void Start()
+        {
 
-	public void Exit()
-	{
-		Application.Quit();
-	}
+        }
+
+        public void StartRogueLike()
+        {
+            Application.LoadLevel(1);
+
+        }
+
+        public void Settings()
+        {
+            Debug.Log("settings");
+        }
+
+        public void Exit()
+        {
+            Application.Quit();
+        }
+    }
 }
