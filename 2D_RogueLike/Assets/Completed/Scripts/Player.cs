@@ -13,9 +13,9 @@ namespace Completed
 		public int pointsPerFood = 10;				//Number of points to add to player food points when picking up a food object.
 		public int pointsPerSoda = 20;				//Number of points to add to player food points when picking up a soda object.
 		public int wallDamage = 1;					//How much damage a player does to a wall when chopping it.
-		//public Text foodText;						//UI Text to display current player food total.
+		public Text foodText;						//UI Text to display current player food total.
 		public Image foodBar;
-		private float maxFood = 500.0f;
+		private float maxFood = 250.0f;
 
 		public AudioClip moveSound1;				//1 of 2 Audio clips to play when player moves.
 		public AudioClip moveSound2;				//2 of 2 Audio clips to play when player moves.
@@ -77,37 +77,40 @@ namespace Completed
 		}
 		
 		private void Update ()
-		{
-			//If it's not the player's turn, exit the function.
-			if(!GameManager.instance.playersTurn) return;
-			
-			int horizontal = 0;  	//Used to store the horizontal move direction.
-			int vertical = 0;		//Used to store the vertical move direction.
-			
-			//Check if we are running either in the Unity editor or in a standalone build.
-			#if UNITY_STANDALONE || UNITY_WEBPLAYER
-			
-			//Get input from the input manager, round it to an integer and store in horizontal to set x axis move direction
-			horizontal = (int) (Input.GetAxisRaw ("Horizontal"));
-			
-			//Get input from the input manager, round it to an integer and store in vertical to set y axis move direction
-			vertical = (int) (Input.GetAxisRaw ("Vertical"));
-			
-			//Check if moving horizontally, if so set vertical to zero.
-			if(horizontal != 0)
-			{
-				vertical = 0;
-			}
-				
-			//Calling the functions
-			PlayerChangeColor();
+        {
+            foodText.color = new Color(1, 1, 1, foodText.color.a - 0.01f);
+            //If it's not the player's turn, exit the function.
+            if (!GameManager.instance.playersTurn) return;
 
-			CameraShaking();
+            int horizontal = 0;     //Used to store the horizontal move direction.
+            int vertical = 0;       //Used to store the vertical move direction.
 
-			ThrowingKnifes();
-				
-			//Check if we are running on iOS, Android, Windows Phone 8 or Unity iPhone
-			#elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
+            //Check if we are running either in the Unity editor or in a standalone build.
+#if UNITY_STANDALONE || UNITY_WEBPLAYER
+
+            //Get input from the input manager, round it to an integer and store in horizontal to set x axis move direction
+            horizontal = (int)(Input.GetAxisRaw("Horizontal"));
+
+            //Get input from the input manager, round it to an integer and store in vertical to set y axis move direction
+            vertical = (int)(Input.GetAxisRaw("Vertical"));
+
+            //Check if moving horizontally, if so set vertical to zero.
+            if (horizontal != 0)
+            {
+                vertical = 0;
+            }
+
+            FlipPlayer();
+
+            //Calling the functions
+            PlayerChangeColor();
+
+            CameraShaking();
+
+            ThrowingKnifes();
+
+            //Check if we are running on iOS, Android, Windows Phone 8 or Unity iPhone
+#elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
 			
 			//Check if Input has registered more than zero touches
 			if (Input.touchCount > 0)
@@ -147,17 +150,29 @@ namespace Completed
 				}
 			}
 			
-			#endif //End of mobile platform dependendent compilation section started above with #elif
-			//Check if we have a non-zero value for horizontal or vertical
-			if(horizontal != 0 || vertical != 0)
-			{
-				//Call AttemptMove passing in the generic parameter Wall, since that is what Player may interact with if they encounter one (by attacking it)
-				//Pass in horizontal and vertical as parameters to specify the direction to move Player in.
-				AttemptMove<Wall> (horizontal, vertical);
-			}
-		}
+#endif //End of mobile platform dependendent compilation section started above with #elif
+            //Check if we have a non-zero value for horizontal or vertical
+            if (horizontal != 0 || vertical != 0)
+            {
+                //Call AttemptMove passing in the generic parameter Wall, since that is what Player may interact with if they encounter one (by attacking it)
+                //Pass in horizontal and vertical as parameters to specify the direction to move Player in.
+                AttemptMove<Wall>(horizontal, vertical);
+            }
+        }
 
-		private void PlayerChangeColor()
+        private void FlipPlayer()
+        {
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
+            {
+                GetComponent<SpriteRenderer>().flipX = true;
+            }
+            else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+            {
+                GetComponent<SpriteRenderer>().flipX = false;
+            }
+        }
+
+        private void PlayerChangeColor()
 		{
 			//Change the color back to normal after 0.025s, after being hit by an enemy
 			if (gotHit == true) 
@@ -222,7 +237,6 @@ namespace Completed
 				{
 					Instantiate(knife, gameObject.transform.position, Quaternion.Euler(0, 0, 90));
 				}
-
 				if(knifeDir == 2)
 				{
 					Instantiate(knife, gameObject.transform.position, Quaternion.Euler(0, 0, 180));
@@ -247,6 +261,7 @@ namespace Completed
 			
 			//Update food text display to reflect current score.
 			//foodText.text = "Food: " + food;
+
 			foodBar.fillAmount = food / maxFood;
 			
 			//Call the AttemptMove method of the base class, passing in the component T (in this case Wall) and x and y direction to move.
@@ -288,49 +303,49 @@ namespace Completed
 		//OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).
 		private void OnTriggerEnter2D (Collider2D other)
 		{
-			//Check if the tag of the trigger collided with is Exit.
-			if(other.tag == "Exit")
-			{
-				//Invoke the Restart function to start the next level with a delay of restartLevelDelay (default 1 second).
-				Invoke ("Restart", restartLevelDelay);
-				
-				//Disable the player object since level is over.
-				enabled = false;
-			}
-			
-			//Check if the tag of the trigger collided with is Food.
-			else if(other.tag == "Food")
-			{
-				//Add pointsPerFood to the players current food total.
-				food += pointsPerFood;
-				
-				//Update foodText to represent current total and notify player that they gained points
-				//foodText.text = "+" + pointsPerFood + " Food: " + food;
-				foodBar.fillAmount = (pointsPerFood + food) / maxFood;
-				
-				//Call the RandomizeSfx function of SoundManager and pass in two eating sounds to choose between to play the eating sound effect.
-				SoundManager.instance.RandomizeSfx (eatSound1, eatSound2);
-				
-				//Disable the food object the player collided with.
-				other.gameObject.SetActive (false);
-			}
-			
-			//Check if the tag of the trigger collided with is Soda.
-			else if(other.tag == "Soda")
-			{
-				//Add pointsPerSoda to players food points total
-				food += pointsPerSoda;
-				
-				//Update foodText to represent current total and notify player that they gained points
-				//foodText.text = "+" + pointsPerSoda + " Food: " + food;
-				foodBar.fillAmount = (pointsPerFood + food) / maxFood;
-				
-				//Call the RandomizeSfx function of SoundManager and pass in two drinking sounds to choose between to play the drinking sound effect.
-				SoundManager.instance.RandomizeSfx (drinkSound1, drinkSound2);
-				
-				//Disable the soda object the player collided with.
-				other.gameObject.SetActive (false);
-			}
+            //Check if the tag of the trigger collided with is Exit.
+            if (other.tag == "Exit")
+            {
+                //Invoke the Restart function to start the next level with a delay of restartLevelDelay (default 1 second).
+                Invoke("Restart", restartLevelDelay);
+
+                //Disable the player object since level is over.
+                enabled = false;
+            }
+
+            //Check if the tag of the trigger collided with is Food.
+            else if (other.tag == "Food")
+            {
+                //Add pointsPerFood to the players current food total.
+                food += pointsPerFood;
+                //Update foodText to represent current total and notify player that they gained points
+                foodText.color = Color.white;
+                foodText.text = "+" + pointsPerFood;
+                foodBar.fillAmount = food / maxFood;
+
+                //Call the RandomizeSfx function of SoundManager and pass in two eating sounds to choose between to play the eating sound effect.
+                SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
+
+                //Disable the food object the player collided with.
+                other.gameObject.SetActive(false);
+            }
+
+            //Check if the tag of the trigger collided with is Soda.
+            else if (other.tag == "Soda")
+            {
+                //Add pointsPerSoda to players food points total
+                food += pointsPerSoda;
+                //Update foodText to represent current total and notify player that they gained points
+                foodText.color = Color.white;
+                foodText.text = "+" + pointsPerSoda;
+                foodBar.fillAmount = food / maxFood;
+
+                //Call the RandomizeSfx function of SoundManager and pass in two drinking sounds to choose between to play the drinking sound effect.
+                SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
+
+                //Disable the soda object the player collided with.
+                other.gameObject.SetActive(false);
+            }
 		}
 		
 		
@@ -386,6 +401,6 @@ namespace Completed
 				GameManager.instance.GameOver ();
 			}
 		}
-	}
+    }
 }
 
