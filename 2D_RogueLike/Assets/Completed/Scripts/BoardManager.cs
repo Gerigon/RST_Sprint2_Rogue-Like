@@ -24,8 +24,8 @@ namespace Completed
 				maximum = max;
 			}
 		}
-		
-		
+
+        private GameObject player;
 		public int columns = 8; 										//Number of columns in our game board.
 		public int rows = 8;											//Number of rows in our game board.
 		public Count wallCount = new Count (5, 9);						//Lower and upper limit for our random number of walls per level.
@@ -42,6 +42,7 @@ namespace Completed
 		
 		
 		//Clears our list gridPositions and prepares it to generate a new board.
+        
 		void InitialiseList ()
 		{
 			//Clear our list gridPositions.
@@ -151,6 +152,7 @@ namespace Completed
 			
 			//Instantiate the exit tile in the upper right hand corner of our game board
 			Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
+
 		}
 	}
 }
