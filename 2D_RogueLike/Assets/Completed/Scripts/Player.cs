@@ -24,6 +24,10 @@ namespace Completed
 		public AudioClip drinkSound1;				//1 of 2 Audio clips to play when player collects a soda object.
 		public AudioClip drinkSound2;				//2 of 2 Audio clips to play when player collects a soda object.
 		public AudioClip gameOverSound;				//Audio clip to play when player dies.
+        public AudioClip PickUpSound_New;           //New Pickup sound for food.
+        public AudioClip LvlCompleted_New;          //New Level Completed sound.
+        public AudioClip GetHitSound_New;           //New Get hit sound.
+        public AudioClip HitSound_New;              //New Hit sound.
 		
 		private Animator animator;					//Used to store a reference to the Player's animator component.
 		private int food;							//Used to store player food points total during level.
@@ -248,8 +252,10 @@ namespace Completed
 				}
 
 				knifes -= 1;
-				knifeText.text = "Knife:" + knifes;
-			}
+				knifeText.text = "Knife: " + knifes;
+                //New knife hit sound.
+                SoundManager.instance.PlaySingle(HitSound_New);
+            }
 		}
 		
 		//AttemptMove overrides the AttemptMove function in the base class MovingObject
@@ -309,6 +315,9 @@ namespace Completed
                 //Invoke the Restart function to start the next level with a delay of restartLevelDelay (default 1 second).
                 Invoke("Restart", restartLevelDelay);
 
+                //New level completed sound.
+                SoundManager.instance.PlaySingle(LvlCompleted_New);
+
                 //Disable the player object since level is over.
                 enabled = false;
             }
@@ -323,9 +332,8 @@ namespace Completed
                 foodText.text = "+" + pointsPerFood;
                 foodBar.fillAmount = food / maxFood;
 
-                //Call the RandomizeSfx function of SoundManager and pass in two eating sounds to choose between to play the eating sound effect.
-                SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
-
+                //New food pickup sound.
+                SoundManager.instance.PlaySingle(PickUpSound_New);
                 //Disable the food object the player collided with.
                 other.gameObject.SetActive(false);
             }
@@ -340,9 +348,8 @@ namespace Completed
                 foodText.text = "+" + pointsPerSoda;
                 foodBar.fillAmount = food / maxFood;
 
-                //Call the RandomizeSfx function of SoundManager and pass in two drinking sounds to choose between to play the drinking sound effect.
-                SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
-
+                //New food pickup sound.
+                SoundManager.instance.PlaySingle(PickUpSound_New);
                 //Disable the soda object the player collided with.
                 other.gameObject.SetActive(false);
             }
@@ -368,8 +375,11 @@ namespace Completed
 			gotHit = true;
 			gameObject.GetComponent<SpriteRenderer> ().color = Color.red;
 
-			//Subtract lost food points from the players total.
-			food -= loss;
+            //New getting hit sound.
+            SoundManager.instance.PlaySingle(GetHitSound_New);
+
+            //Subtract lost food points from the players total.
+            food -= loss;
 			
 			//Update the food display with the new total.
 			//foodText.text = "-"+ loss + " Food: " + food;
