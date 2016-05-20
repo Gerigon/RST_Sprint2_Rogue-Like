@@ -22,7 +22,8 @@ namespace Completed
 		private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
 		private bool enemiesMoving;								//Boolean to check if enemies are moving.
 		private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
-		
+
+		private GameObject foodBarImage;
 		
 		
 		//Awake is always called before any Start functions
@@ -64,6 +65,10 @@ namespace Completed
 		//Initializes the game for each level.
 		public void InitGame()
 		{
+			//Make the foodbar not active
+			foodBarImage = GameObject.Find("FoodBarCanvas");
+			foodBarImage.SetActive (false);
+
 			//While doingSetup is true the player can't move, prevent player from moving while title card is up.
 			doingSetup = true;
 			
@@ -96,6 +101,9 @@ namespace Completed
 		{
 			//Disable the levelImage gameObject.
 			levelImage.SetActive(false);
+
+			//Show the food bar now
+			foodBarImage.SetActive(true);
 			
 			//Set doingSetup to false allowing player to move again.
 			doingSetup = false;
