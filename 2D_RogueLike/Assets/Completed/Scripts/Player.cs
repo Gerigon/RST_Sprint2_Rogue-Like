@@ -380,10 +380,11 @@ namespace Completed
 
             //Subtract lost food points from the players total.
             food -= loss;
-			
-			//Update the food display with the new total.
-			//foodText.text = "-"+ loss + " Food: " + food;
-			foodBar.fillAmount = food / maxFood;
+            foodText.color = Color.white;
+            foodText.text = "-" + loss;
+            //Update the food display with the new total.
+            //foodText.text = "-"+ loss + " Food: " + food;
+            foodBar.fillAmount = food / maxFood;
 
 			//Make the camera vibrate when you get hit
 			if (shake <= 0.0f) {

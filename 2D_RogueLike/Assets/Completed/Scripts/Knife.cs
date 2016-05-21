@@ -20,6 +20,7 @@ public class Knife : MonoBehaviour {
         other.gameObject.GetComponent<Completed.Enemy>().enemyDied = true;
         //Changes the Sprite to the bloody one.
         other.gameObject.GetComponent<SpriteRenderer>().sprite = blood;
+        other.gameObject.GetComponent<Renderer>().sortingLayerName = "Food";
         //Disables all the not-needed enemy components from the ex-enemy.
         other.gameObject.GetComponent<Animator>().enabled = false;
         other.gameObject.GetComponent<Completed.Enemy>().enabled = false;
