@@ -383,7 +383,7 @@ namespace Completed
 			
 			//Update the food display with the new total.
 			//foodText.text = "-"+ loss + " Food: " + food;
-			foodBar.fillAmount = (food - loss) / maxFood;
+			foodBar.fillAmount = food / maxFood;
 
 			//Make the camera vibrate when you get hit
 			if (shake <= 0.0f) {
