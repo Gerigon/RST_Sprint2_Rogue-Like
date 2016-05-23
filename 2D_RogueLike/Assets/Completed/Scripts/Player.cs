@@ -47,10 +47,13 @@ namespace Completed
 		public int knifeDir = 0;					//used to look in which direction the player is facing
 		public GameObject knife;					//uses the prefab knife to instantiate later on
 		private int knifes = 2;						//amount of knives
-		public Text knifeText;						//used to change the knifeText
-		
-		//Start overrides the Start function of MovingObject
-		protected override void Start ()
+		public Text knifeText;                      //used to change the knifeText
+
+        public bool IsGameOver;
+        float upwardMotion = 0.002f;
+
+        //Start overrides the Start function of MovingObject
+        protected override void Start ()
 		{
 			//Get a component reference to the Player's animator component
 			animator = GetComponent<Animator>();
@@ -61,7 +64,9 @@ namespace Completed
 			//Set the foodText to reflect the current player food total.
 			//foodText.text = "Food: " + food;
 			foodBar.fillAmount = food / maxFood;
-			
+
+            
+
 			//Call the Start function of the MovingObject base class.
 			base.Start ();
 		}
@@ -82,38 +87,44 @@ namespace Completed
 		
 		private void Update ()
         {
-            foodText.color = new Color(1, 1, 1, foodText.color.a - 0.01f);
-            //If it's not the player's turn, exit the function.
-            if (!GameManager.instance.playersTurn) return;
+            if (IsGameOver)
+            {
+                GameOver();
+            }
+            else
+            {
+                foodText.color = new Color(1, 1, 1, foodText.color.a - 0.01f);
+                //If it's not the player's turn, exit the function.
+                if (!GameManager.instance.playersTurn) return;
 
-            int horizontal = 0;     //Used to store the horizontal move direction.
-            int vertical = 0;       //Used to store the vertical move direction.
+                int horizontal = 0;     //Used to store the horizontal move direction.
+                int vertical = 0;       //Used to store the vertical move direction.
 
-            //Check if we are running either in the Unity editor or in a standalone build.
+                //Check if we are running either in the Unity editor or in a standalone build.
 #if UNITY_STANDALONE || UNITY_WEBPLAYER
 
-            //Get input from the input manager, round it to an integer and store in horizontal to set x axis move direction
-            horizontal = (int)(Input.GetAxisRaw("Horizontal"));
+                //Get input from the input manager, round it to an integer and store in horizontal to set x axis move direction
+                horizontal = (int)(Input.GetAxisRaw("Horizontal"));
 
-            //Get input from the input manager, round it to an integer and store in vertical to set y axis move direction
-            vertical = (int)(Input.GetAxisRaw("Vertical"));
+                //Get input from the input manager, round it to an integer and store in vertical to set y axis move direction
+                vertical = (int)(Input.GetAxisRaw("Vertical"));
 
-            //Check if moving horizontally, if so set vertical to zero.
-            if (horizontal != 0)
-            {
-                vertical = 0;
-            }
+                //Check if moving horizontally, if so set vertical to zero.
+                if (horizontal != 0)
+                {
+                    vertical = 0;
+                }
 
-            FlipPlayer();
+                FlipPlayer();
 
-            //Calling the functions
-            PlayerChangeColor();
+                //Calling the functions
+                
 
-            CameraShaking();
+                CameraShaking();
 
-            ThrowingKnifes();
+                ThrowingKnifes();
 
-            //Check if we are running on iOS, Android, Windows Phone 8 or Unity iPhone
+                //Check if we are running on iOS, Android, Windows Phone 8 or Unity iPhone
 #elif UNITY_IOS || UNITY_ANDROID || UNITY_WP8 || UNITY_IPHONE
 			
 			//Check if Input has registered more than zero touches
@@ -155,13 +166,15 @@ namespace Completed
 			}
 			
 #endif //End of mobile platform dependendent compilation section started above with #elif
-            //Check if we have a non-zero value for horizontal or vertical
-            if (horizontal != 0 || vertical != 0)
-            {
-                //Call AttemptMove passing in the generic parameter Wall, since that is what Player may interact with if they encounter one (by attacking it)
-                //Pass in horizontal and vertical as parameters to specify the direction to move Player in.
-                AttemptMove<Wall>(horizontal, vertical);
+                //Check if we have a non-zero value for horizontal or vertical
+                if (horizontal != 0 || vertical != 0)
+                {
+                    //Call AttemptMove passing in the generic parameter Wall, since that is what Player may interact with if they encounter one (by attacking it)
+                    //Pass in horizontal and vertical as parameters to specify the direction to move Player in.
+                    AttemptMove<Wall>(horizontal, vertical);
+                }
             }
+            PlayerChangeColor();
         }
 
         private void FlipPlayer()
@@ -403,16 +416,24 @@ namespace Completed
 			//Check if food point total is less than or equal to zero.
 			if (food <= 0) 
 			{
-				//Call the PlaySingle function of SoundManager and pass it the gameOverSound as the audio clip to play.
-				SoundManager.instance.PlaySingle (gameOverSound);
+                animator.SetTrigger("playerDead");
+                IsGameOver = true;
+                //Call the PlaySingle function of SoundManager and pass it the gameOverSound as the audio clip to play.
+                SoundManager.instance.PlaySingle (gameOverSound);
 				
 				//Stop the background music.
 				SoundManager.instance.musicSource.Stop();
-				
 				//Call the GameOver function of GameManager.
-				GameManager.instance.GameOver ();
+				//GameManager.instance.GameOver ();
 			}
 		}
+        private void GameOver()
+        {
+            Debug.Log(upwardMotion);
+            upwardMotion = upwardMotion * 1.05f;
+            upwardMotion = Mathf.Clamp(upwardMotion, 0, 0.1f);
+            transform.Translate(new Vector3(0, upwardMotion, 0));
+        }
     }
 }
 
