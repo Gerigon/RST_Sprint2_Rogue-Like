@@ -9,7 +9,7 @@ namespace Completed
 	//Player inherits from MovingObject, our base class for objects that can move, Enemy also inherits from this.
 	public class Player : MovingObject
 	{
-		public float restartLevelDelay = 1f;		//Delay time in seconds to restart level.
+		public float restartLevelDelay = 1;		//Delay time in seconds to restart level.
 		public int pointsPerFood = 10;				//Number of points to add to player food points when picking up a food object.
 		public int pointsPerSoda = 20;				//Number of points to add to player food points when picking up a soda object.
 		public int wallDamage = 1;					//How much damage a player does to a wall when chopping it.
@@ -362,11 +362,12 @@ namespace Completed
 			//Load the last scene loaded, in this case Main, the only scene in the game.
 			Application.LoadLevel (Application.loadedLevel);
 		}
-		
-		
-		//LoseFood is called when an enemy attacks the player.
-		//It takes a parameter loss which specifies how many points to lose.
-		public void LoseFood (int loss)
+
+        
+
+        //LoseFood is called when an enemy attacks the player.
+        //It takes a parameter loss which specifies how many points to lose.
+        public void LoseFood (int loss)
 		{
 			//Set the trigger for the player animator to transition to the playerHit animation.
 			animator.SetTrigger ("playerHit");
@@ -380,10 +381,11 @@ namespace Completed
 
             //Subtract lost food points from the players total.
             food -= loss;
-			
-			//Update the food display with the new total.
-			//foodText.text = "-"+ loss + " Food: " + food;
-			foodBar.fillAmount = (food - loss) / maxFood;
+            foodText.color = Color.white;
+            foodText.text = "-" + loss;
+            //Update the food display with the new total.
+            //foodText.text = "-"+ loss + " Food: " + food;
+            foodBar.fillAmount = food / maxFood;
 
 			//Make the camera vibrate when you get hit
 			if (shake <= 0.0f) {
