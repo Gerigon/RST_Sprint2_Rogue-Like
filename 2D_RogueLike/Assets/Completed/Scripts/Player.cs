@@ -52,9 +52,12 @@ namespace Completed
         public bool IsGameOver;
         float upwardMotion = 0.002f;
 
+        public GameObject fader;
+
         //Start overrides the Start function of MovingObject
         protected override void Start ()
 		{
+            fader = GameObject.Find("Fader");
 			//Get a component reference to the Player's animator component
 			animator = GetComponent<Animator>();
 			
@@ -420,7 +423,7 @@ namespace Completed
                 IsGameOver = true;
                 //Call the PlaySingle function of SoundManager and pass it the gameOverSound as the audio clip to play.
                 SoundManager.instance.PlaySingle (gameOverSound);
-				
+                GetComponent<BoxCollider2D>().enabled = false;
 				//Stop the background music.
 				SoundManager.instance.musicSource.Stop();
 				//Call the GameOver function of GameManager.
@@ -433,6 +436,21 @@ namespace Completed
             upwardMotion = upwardMotion * 1.05f;
             upwardMotion = Mathf.Clamp(upwardMotion, 0, 0.1f);
             transform.Translate(new Vector3(0, upwardMotion, 0));
+            StartCoroutine(FadeTo(1, 3));
+        }
+        IEnumerator FadeTo(float aValue, float aTime)
+        {
+            fader.SetActive(true);
+            float alpha = fader.GetComponent<Image>().color.a;
+            for (float t = 0.0f; t < 1.0f; t += Time.deltaTime / aTime)
+            {
+                Color newColor = new Color(1, 1, 1, Mathf.Lerp(alpha, aValue, t));
+                fader.GetComponent<Image>().color = newColor;
+                yield return null;
+            }
+            Destroy(GameManager.instance);
+            Destroy(SoundManager.instance);
+            Application.LoadLevel(0);
         }
     }
 }
